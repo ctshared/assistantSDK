@@ -1,0 +1,1 @@
+./keytool-importkeypair -k platform.keystore -p android -pk8 platform.pk8 -cert platform.x509.pem -alias platform
