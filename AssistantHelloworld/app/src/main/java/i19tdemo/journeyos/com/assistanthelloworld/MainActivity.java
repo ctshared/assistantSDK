@@ -30,6 +30,7 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
                 R.id.startStopWatch,
                 R.id.startCalendar,
                 R.id.setScreenBrightness,
+                R.id.getScreenBrightness,
                 R.id.getBatteryInfo,
                 R.id.openAppMarket,
         };
@@ -84,6 +85,9 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
                 break;
             case R.id.setScreenBrightness:
                 setScreenBrightness();
+                break;
+            case R.id.getScreenBrightness:
+                getScreenBrightness();
                 break;
             case R.id.getBatteryInfo:
                 getBatteryInfo();
@@ -145,6 +149,11 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
         String str = ((EditText) findViewById(R.id.setScreenBrightness_value)).getText().toString();
         int brightness = Integer.parseInt(str);
         Starter.setScreenBrightness(this, brightness);
+        return;
+    }
+    private void getScreenBrightness() {
+        int brightness = Starter.getScreenBrightness(this);
+        ((TextView) findViewById(R.id.getScreenBrightness_value)).setText("value = "+brightness);
         return;
     }
 
