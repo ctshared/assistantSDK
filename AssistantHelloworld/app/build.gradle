@@ -11,31 +11,14 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-    signingConfigs {
-        release {
-            File strFile = new File("../app/keystore/platform.keystore")
-            storeFile file(strFile)
-            keyAlias 'platform'
-            keyPassword  'android'
-            storePassword 'android'
-        }
-        debug {
-            File strFile = new File("../app/keystore/platform.keystore")
-            storeFile file(strFile)
-            keyAlias 'platform'
-            keyPassword 'android'
-            storePassword 'android'
-        }
-    }
+
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
-            signingConfig signingConfigs.debug
         }
     }
 

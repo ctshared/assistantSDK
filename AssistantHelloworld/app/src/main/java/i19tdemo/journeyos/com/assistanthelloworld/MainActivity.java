@@ -3,6 +3,7 @@ package i19tdemo.journeyos.com.assistanthelloworld;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 
 import com.journeyui.assistantapi.BatteryInfo;
 import com.journeyui.assistantapi.Starter;
+import com.journeyui.assistantapi.ITorchCallback;
 
 public class MainActivity extends Activity  implements  View.OnClickListener {
 
@@ -33,6 +35,8 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
                 R.id.getScreenBrightness,
                 R.id.getBatteryInfo,
                 R.id.openAppMarket,
+                R.id.btnGetFlashStatus,
+                R.id.network_switch
         };
 
         for (int id : ids) {
@@ -45,6 +49,7 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
                     Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, 1);
         }
+        Starter.bindAssistantService(this);
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -94,6 +99,12 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
                 break;
             case R.id.openAppMarket:
                 openAppMarket();
+                break;
+            case R.id.btnGetFlashStatus:
+                getFlashStatus();
+                break;
+            case R.id.network_switch:
+                getNetworkSwitch();
                 break;
             default:
                 break;
@@ -171,5 +182,27 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
         String packageName = ((EditText) findViewById(R.id.packageName)).getText().toString();
         Starter.openAppMarket(this,packageName);
         return;
+    }
+
+    ITorchCallback iTorchCallback = new ITorchCallback() {
+        @Override
+        public void onTorchStatusChange(boolean enabled) {
+            ((TextView) findViewById(R.id.flashStatus)).setText(enabled + "");
+        }
+    };
+
+    public void getFlashStatus() {
+        Starter.registerTorchCallback(this, iTorchCallback);
+    }
+
+    public void getNetworkSwitch() {
+        boolean isOpen = Starter.getMobileDataEnabled();
+        ((TextView) findViewById(R.id.network_status)).setText(isOpen + "");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Starter.unregisterTorchCallback(this);
     }
 }
