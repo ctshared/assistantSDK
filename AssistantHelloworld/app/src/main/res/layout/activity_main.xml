@@ -135,6 +135,76 @@
                 android:id="@+id/packageName"
                 android:text="packageName" />
             </LinearLayout>
+
+
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnGetFlashStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="getFlashStatus"/>
+
+                <TextView
+                    android:id="@+id/flashStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="null"/>
+            </LinearLayout>
+
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/network_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="NetWorkSwitch"/>
+
+                <TextView
+                    android:id="@+id/network_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="null"/>
+            </LinearLayout>
+
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:text="MobileData"
+                    android:textSize="20sp"
+                    />
+
+                <RadioGroup
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="50dp">
+
+                    <RadioButton
+                        android:id="@+id/open_mobiledata"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="open"/>
+
+                    <RadioButton
+                        android:id="@+id/close_mobiledata"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="close"/>
+                </RadioGroup>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -36,7 +36,9 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
                 R.id.getBatteryInfo,
                 R.id.openAppMarket,
                 R.id.btnGetFlashStatus,
-                R.id.network_switch
+                R.id.network_switch,
+                R.id.open_mobiledata,
+                R.id.close_mobiledata
         };
 
         for (int id : ids) {
@@ -49,7 +51,8 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
                     Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, 1);
         }
-        Starter.bindAssistantService(this);
+        mStarter = Starter.getInstance();
+        mStarter.bindAssistantService(this);
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -106,6 +109,11 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
             case R.id.network_switch:
                 getNetworkSwitch();
                 break;
+            case R.id.open_mobiledata:
+                openMobileData();
+                break;
+            case R.id.close_mobiledata:
+                closeMobileData();
             default:
                 break;
 
@@ -118,58 +126,59 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
     }
 
     private void startCamera_CAMERA_TYPE_FRONT() {
-        Starter.startCamera(this, Starter.CAMERA_TYPE_FRONT);
+        mStarter.startCamera(this, Starter.CAMERA_TYPE_FRONT);
         return;
     }
 
     private void startCamera_CAMERA_TYPE_REAR() {
-        Starter.startCamera(this, Starter.CAMERA_TYPE_REAR);
+        mStarter.startCamera(this, Starter.CAMERA_TYPE_REAR);
         return;
     }
 
     private void startFlashLight() {
-        Starter.startFlashLight(this);
+        mStarter.startFlashLight(this);
         return;
     }
 
     private void stopFlashLight() {
-        Starter.stopFlashLight(this);
+        mStarter.stopFlashLight(this);
         return;
     }
 
     private void startTimer() {
         String str = ((EditText) findViewById(R.id.startTimer_value)).getText().toString();
         int seconds = Integer.parseInt(str);
-        Starter.startTimer(this,seconds);
+        mStarter.startTimer(this, seconds);
         return;
     }
 
     private void startStopWatch() {
         String str = ((EditText) findViewById(R.id.startStopWatch_value)).getText().toString();
-        boolean enable = Integer.parseInt(str) == 0? false:true;
-        Starter.startStopWatch(this,enable);
+        boolean enable = Integer.parseInt(str) == 0 ? false : true;
+        mStarter.startStopWatch(this, enable);
         return;
     }
 
     private void startCalendar() {
-        Starter.startCalendar(this);
+        mStarter.startCalendar(this);
         return;
     }
 
     private void setScreenBrightness() {
         String str = ((EditText) findViewById(R.id.setScreenBrightness_value)).getText().toString();
         int brightness = Integer.parseInt(str);
-        Starter.setScreenBrightness(this, brightness);
+        mStarter.setScreenBrightness(brightness);
         return;
     }
+
     private void getScreenBrightness() {
-        int brightness = Starter.getScreenBrightness(this);
-        ((TextView) findViewById(R.id.getScreenBrightness_value)).setText("value = "+brightness);
+        int brightness = mStarter.getScreenBrightness();
+        ((TextView) findViewById(R.id.getScreenBrightness_value)).setText("value = " + brightness);
         return;
     }
 
     private void getBatteryInfo() {
-        BatteryInfo batteryInfo = Starter.getBatteryInfo(this);
+        BatteryInfo batteryInfo = mStarter.getBatteryInfo(this);
         TextView currentBatteryLevel = (TextView) findViewById(R.id.currentBatteryLevel);
         currentBatteryLevel.setText("battery level = " + batteryInfo.currentBatteryLevel);
 
@@ -180,8 +189,21 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
 
     private void openAppMarket() {
         String packageName = ((EditText) findViewById(R.id.packageName)).getText().toString();
-        Starter.openAppMarket(this,packageName);
+        mStarter.openAppMarket(this, packageName);
         return;
+    }
+
+    private void getNetworkSwitch() {
+        boolean isOpen = mStarter.getMobileDataEnabled();
+        ((TextView) findViewById(R.id.network_status)).setText(isOpen + "");
+    }
+
+    private void openMobileData() {
+        mStarter.setMobileDataEnabled(true);
+    }
+
+    private void closeMobileData() {
+        mStarter.setMobileDataEnabled(false);
     }
 
     ITorchCallback iTorchCallback = new ITorchCallback() {
@@ -192,17 +214,16 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
     };
 
     public void getFlashStatus() {
-        Starter.registerTorchCallback(this, iTorchCallback);
-    }
-
-    public void getNetworkSwitch() {
-        boolean isOpen = Starter.getMobileDataEnabled();
-        ((TextView) findViewById(R.id.network_status)).setText(isOpen + "");
+        hasRegistTorcallback = true;
+        mStarter.registerTorchCallback(this, iTorchCallback);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Starter.unregisterTorchCallback(this);
+        mStarter.unbindAssistantService(this);
+        if (hasRegistTorcallback) {
+            mStarter.unregisterTorchCallback(this);
+        }
     }
 }
