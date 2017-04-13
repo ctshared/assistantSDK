@@ -17,6 +17,9 @@ import com.journeyui.assistantapi.Starter;
 import com.journeyui.assistantapi.ITorchCallback;
 
 public class MainActivity extends Activity  implements  View.OnClickListener {
+    private Starter mStarter;
+    private boolean hasRegistTorcallback = false;
+    private final static String SERVICE_NOT_CONNECTED = "AsssistantService Not Connected!";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +54,7 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
                     Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, 1);
         }
-        mStarter = Starter.getInstance();
-        mStarter.bindAssistantService(this);
+        mStarter = Starter.getInstance(getApplicationContext());
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -126,59 +128,71 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
     }
 
     private void startCamera_CAMERA_TYPE_FRONT() {
-        mStarter.startCamera(this, Starter.CAMERA_TYPE_FRONT);
+        mStarter.startCamera(Starter.CAMERA_TYPE_FRONT);
         return;
     }
 
     private void startCamera_CAMERA_TYPE_REAR() {
-        mStarter.startCamera(this, Starter.CAMERA_TYPE_REAR);
+        mStarter.startCamera(Starter.CAMERA_TYPE_REAR);
         return;
     }
 
     private void startFlashLight() {
-        mStarter.startFlashLight(this);
+        mStarter.startFlashLight();
         return;
     }
 
     private void stopFlashLight() {
-        mStarter.stopFlashLight(this);
+        mStarter.stopFlashLight();
         return;
     }
 
     private void startTimer() {
         String str = ((EditText) findViewById(R.id.startTimer_value)).getText().toString();
         int seconds = Integer.parseInt(str);
-        mStarter.startTimer(this, seconds);
+        mStarter.startTimer(seconds);
         return;
     }
 
     private void startStopWatch() {
         String str = ((EditText) findViewById(R.id.startStopWatch_value)).getText().toString();
         boolean enable = Integer.parseInt(str) == 0 ? false : true;
-        mStarter.startStopWatch(this, enable);
+        mStarter.startStopWatch(enable);
         return;
     }
 
     private void startCalendar() {
-        mStarter.startCalendar(this);
+        mStarter.startCalendar();
         return;
     }
 
     private void setScreenBrightness() {
         String str = ((EditText) findViewById(R.id.setScreenBrightness_value)).getText().toString();
         int brightness = Integer.parseInt(str);
-        mStarter.setScreenBrightness(brightness);
-        return;
+        int result = mStarter.setScreenBrightness(brightness);
+        switch (result) {
+            case Starter.SERVICE_CONNECTED:
+                Toast.makeText(this, "set screenbrightness success", Toast.LENGTH_SHORT).show();
+                break;
+            case Starter.SERVICE_NOT_CONNECTED:
+                Toast.makeText(this, SERVICE_NOT_CONNECTED, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void getScreenBrightness() {
         int brightness = mStarter.getScreenBrightness();
-        ((TextView) findViewById(R.id.getScreenBrightness_value)).setText("value = " + brightness);
-        return;
+        switch (brightness) {
+            case Starter.SERVICE_NOT_CONNECTED:
+                ((TextView) findViewById(R.id.getScreenBrightness_value)).setText(SERVICE_NOT_CONNECTED);
+                break;
+            default:
+                ((TextView) findViewById(R.id.getScreenBrightness_value)).setText("value = " + brightness);
+                break;
+        }
     }
 
     private void getBatteryInfo() {
-        BatteryInfo batteryInfo = mStarter.getBatteryInfo(this);
+        BatteryInfo batteryInfo = mStarter.getBatteryInfo();
         TextView currentBatteryLevel = (TextView) findViewById(R.id.currentBatteryLevel);
         currentBatteryLevel.setText("battery level = " + batteryInfo.currentBatteryLevel);
 
@@ -189,21 +203,47 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
 
     private void openAppMarket() {
         String packageName = ((EditText) findViewById(R.id.packageName)).getText().toString();
-        mStarter.openAppMarket(this, packageName);
+        mStarter.openAppMarket(packageName);
         return;
     }
 
     private void getNetworkSwitch() {
-        boolean isOpen = mStarter.getMobileDataEnabled();
-        ((TextView) findViewById(R.id.network_status)).setText(isOpen + "");
+        int result = mStarter.getMobileDataEnabled();
+        switch (result) {
+            case Starter.SERVICE_NOT_CONNECTED:
+                ((TextView) findViewById(R.id.network_status)).setText(SERVICE_NOT_CONNECTED);
+                break;
+            case 1:
+                ((TextView) findViewById(R.id.network_status)).setText("true");
+                break;
+            case 0:
+                ((TextView) findViewById(R.id.network_status)).setText("false");
+                break;
+            default:
+                break;
+        }
     }
 
     private void openMobileData() {
-        mStarter.setMobileDataEnabled(true);
+        int result = mStarter.setMobileDataEnabled(true);
+        switch (result) {
+            case Starter.SERVICE_CONNECTED:
+                Toast.makeText(this, "open mobiledata success", Toast.LENGTH_SHORT).show();
+                break;
+            case Starter.SERVICE_NOT_CONNECTED:
+                Toast.makeText(this, SERVICE_NOT_CONNECTED, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void closeMobileData() {
-        mStarter.setMobileDataEnabled(false);
+        int result = mStarter.setMobileDataEnabled(false);
+        switch (result) {
+            case Starter.SERVICE_CONNECTED:
+                Toast.makeText(this, "close mobiledata success", Toast.LENGTH_SHORT).show();
+                break;
+            case Starter.SERVICE_NOT_CONNECTED:
+                Toast.makeText(this, SERVICE_NOT_CONNECTED, Toast.LENGTH_SHORT).show();
+        }
     }
 
     ITorchCallback iTorchCallback = new ITorchCallback() {
@@ -215,15 +255,17 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
 
     public void getFlashStatus() {
         hasRegistTorcallback = true;
-        mStarter.registerTorchCallback(this, iTorchCallback);
+        mStarter.registerTorchCallback(iTorchCallback);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mStarter.unbindAssistantService(this);
-        if (hasRegistTorcallback) {
-            mStarter.unregisterTorchCallback(this);
+        if (mStarter != null) {
+            if (hasRegistTorcallback) {
+                mStarter.unregisterTorchCallback();
+            }
+            mStarter = null;
         }
     }
 }
