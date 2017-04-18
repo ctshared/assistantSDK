@@ -13,12 +13,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.journeyui.assistantapi.BatteryInfo;
-import com.journeyui.assistantapi.Starter;
+import com.journeyui.assistantapi.IDataChangedCallback;
 import com.journeyui.assistantapi.ITorchCallback;
 
 public class MainActivity extends Activity  implements  View.OnClickListener {
     private Starter mStarter;
     private boolean hasRegistTorcallback = false;
+    private boolean hasRegistMobileback = false;
     private final static String SERVICE_NOT_CONNECTED = "AsssistantService Not Connected!";
 
     @Override
@@ -207,23 +208,6 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
         return;
     }
 
-    private void getNetworkSwitch() {
-        int result = mStarter.getMobileDataEnabled();
-        switch (result) {
-            case Starter.SERVICE_NOT_CONNECTED:
-                ((TextView) findViewById(R.id.network_status)).setText(SERVICE_NOT_CONNECTED);
-                break;
-            case 1:
-                ((TextView) findViewById(R.id.network_status)).setText("true");
-                break;
-            case 0:
-                ((TextView) findViewById(R.id.network_status)).setText("false");
-                break;
-            default:
-                break;
-        }
-    }
-
     private void openMobileData() {
         int result = mStarter.setMobileDataEnabled(true);
         switch (result) {
@@ -253,9 +237,21 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
         }
     };
 
+    IDataChangedCallback iDataChangedCallback = new IDataChangedCallback() {
+        @Override
+        public void onMobileDataChanged(boolean enabled) {
+            ((TextView) findViewById(R.id.network_status)).setText(enabled + "");
+        }
+    };
+
     public void getFlashStatus() {
         hasRegistTorcallback = true;
         mStarter.registerTorchCallback(iTorchCallback);
+    }
+
+    private void getNetworkSwitch() {
+        hasRegistMobileback = true;
+        mStarter.registerMobileDataCallback(iDataChangedCallback);
     }
 
     @Override
@@ -264,6 +260,9 @@ public class MainActivity extends Activity  implements  View.OnClickListener {
         if (mStarter != null) {
             if (hasRegistTorcallback) {
                 mStarter.unregisterTorchCallback();
+            }
+            if (hasRegistMobileback) {
+                mStarter.unregisterMobileDataCallback();
             }
             mStarter = null;
         }
